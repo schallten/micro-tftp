@@ -15,7 +15,7 @@ const HEADER_SIZE: usize = std::mem::size_of::<PacketHeader>();
 const MAX_PACKET: usize = HEADER_SIZE + CHUNK_SIZE;
 
 fn main() -> io::Result<()> {
-    let socket = UdpSocket::bind("0.0.0.0")?;
+    let socket = UdpSocket::bind("0.0.0.0:0")?;
     socket.connect("127.0.0.1:8080")?;
 
     println!("File sharing client");
@@ -46,7 +46,7 @@ fn main() -> io::Result<()> {
 
 fn send_file(socket: &UdpSocket, filename: &str) -> io::Result<()> {
     // open the file
-    let mut file = File::open(filename);
+    let mut file = File::open(filename)?;
 
     // send filename first
     let name_bytes = filename.as_bytes();
