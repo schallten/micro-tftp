@@ -1,4 +1,4 @@
-# fileShare
+# micro-tftp
 
 Trivial file sharing over UDP, written in Rust and C.
 
