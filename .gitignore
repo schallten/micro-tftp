@@ -1,14 +1,6 @@
-# Compiled binaries
-server3
-client3
-*.exe
-micro-tftp-c/server
-micro-tftp-c/client
-
-# Rust project build output
-micro-tftp/target/
-micro-tftp/target/release/server
-micro-tftp/target/release/client
+# Python caches
+__pycache__/
+*.pyc
 
 # Languages list
 languages.txt
