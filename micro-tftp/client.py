@@ -26,13 +26,16 @@ def send_file(sock: socket.socket, filename: str) -> None:
     with open(filename, "rb") as file:
         sock.send(filename.encode())
 
-        ack_buf = sock.recv(1)
+        #ack_buf: bytes = sock.recv(1)
+        # use later to check which chunks werent received and probably re-ask
 
         while True:
-            chunk = file.read(CHUNK_SIZE)
-            is_last = 1 if len(chunk) < CHUNK_SIZE else 0
-            header = PacketHeader(seq_num=seq_num, size=len(chunk), is_last=is_last)
-            packet = pack_header(header) + chunk
+            chunk: bytes = file.read(CHUNK_SIZE)
+            is_last: int = 1 if len(chunk) < CHUNK_SIZE else 0
+            header: PacketHeader = PacketHeader(
+                seq_num=seq_num, size=len(chunk), is_last=is_last
+            )
+            packet: bytes = pack_header(header) + chunk
 
             sock.send(packet)
             sock.recv(1)
@@ -46,14 +49,14 @@ def send_file(sock: socket.socket, filename: str) -> None:
 
 
 def main() -> None:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("0.0.0.0", 0))
     sock.connect(("127.0.0.1", 8080))
 
     print("File sharing client")
     print("Enter filename to send (or 'exit' to quit ) : ")
     while True:
-        filename = input("> ").strip()
+        filename: str = input("> ").strip()
 
         if filename == "exit":
             break

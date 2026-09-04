@@ -13,30 +13,32 @@ class PacketHeader:
 
 
 def unpack_header(data: bytes) -> PacketHeader:
-    seq_num = int.from_bytes(data[0:4], "little")
-    size = int.from_bytes(data[4:6], "little")
-    is_last = data[6]
+    seq_num: int = int.from_bytes(data[0:4], "little")
+    size: int = int.from_bytes(data[4:6], "little")
+    is_last: int = data[6]
     return PacketHeader(seq_num=seq_num, size=size, is_last=is_last)
 
 
-def receive_file(sock: socket.socket, client_addr: tuple, filename: str) -> None:
+def receive_file(
+    sock: socket.socket, client_addr: tuple[str, int], filename: str
+) -> None:
     expected_seq: int = 0
     with open(filename, "wb") as output:
         while True:
-            size, addr = sock.recvfrom(HEADER_SIZE + CHUNK_SIZE)
+            data, addr = sock.recvfrom(HEADER_SIZE + CHUNK_SIZE)
             if addr != client_addr:
                 continue
 
-            if len(size) < HEADER_SIZE:
+            if len(data) < HEADER_SIZE:
                 continue
 
-            header = unpack_header(size)
+            header: PacketHeader = unpack_header(data)
 
             if header.seq_num != expected_seq:
                 continue
 
             if header.size > 0:
-                output.write(size[HEADER_SIZE:HEADER_SIZE + header.size])
+                output.write(data[HEADER_SIZE : HEADER_SIZE + header.size])
 
             sock.sendto(b"\x01", client_addr)
 
@@ -50,13 +52,15 @@ def receive_file(sock: socket.socket, client_addr: tuple, filename: str) -> None
 
 
 def main() -> None:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("0.0.0.0", 8080))
     print("File Sharing Server listening on port 8080")
 
     while True:
+        buf: bytes
+        client_addr: tuple[str, int]
         buf, client_addr = sock.recvfrom(1024)
-        filename = buf.decode(errors="replace")
+        filename: str = buf.decode(errors="replace")
         print(f"\nIncoming file: {filename} from {client_addr[0]}")
 
         sock.sendto(b"\x01", client_addr)
